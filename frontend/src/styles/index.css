@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-paper text-ink dark:bg-ink dark:text-paper font-sans transition-colors duration-300;
+  }
+
+  /* Foco visible y consistente para navegación por teclado en toda la app */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  [tabindex]:focus-visible {
+    @apply outline-none ring-2 ring-stamp-teal ring-offset-2 ring-offset-paper dark:ring-offset-ink;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer utilities {
+  /* Texto accesible solo para lectores de pantalla (labels sin mostrar visualmente) */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+}
+
+/*
+  Motivo firma: "ticket de embarque" — borde punteado + muescas circulares
+  a los lados, usado en el header de racha/XP y en el modal de logros.
+*/
+@layer components {
+  .ticket {
+    @apply relative border-2 border-dashed rounded-card border-ink/20 dark:border-paper/20;
+  }
+  .ticket::before,
+  .ticket::after {
+    content: "";
+    @apply absolute w-4 h-4 rounded-full bg-paper dark:bg-ink top-1/2 -translate-y-1/2;
+  }
+  .ticket::before {
+    left: -10px;
+  }
+  .ticket::after {
+    right: -10px;
+  }
+}
