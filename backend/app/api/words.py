@@ -21,7 +21,7 @@ router = APIRouter(prefix="/api/words", tags=["words"])
 @router.get("", response_model=list[WordOut])
 def list_words(
     category: str | None = Query(default=None),
-    limit: int = Query(default=20, le=100),
+    limit: int = Query(default=20, ge=1, le=100),
     db: Session = Depends(get_db),
     _: User = Depends(get_current_user),
 ):

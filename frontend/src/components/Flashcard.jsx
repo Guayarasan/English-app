@@ -12,16 +12,28 @@ import { motion } from "framer-motion";
  */
 export default function Flashcard({ word, onAnswer }) {
   const [flipped, setFlipped] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
 
-  function handleAnswer(wasCorrect, e) {
+  async function handleAnswer(wasCorrect, e) {
     e.stopPropagation();
-    onAnswer?.(wasCorrect);
-    setFlipped(false);
+    if (busy) return;
+    setBusy(true);
+    setError("");
+    try {
+      await onAnswer?.(wasCorrect);
+      setFlipped(false);
+    } catch {
+      setError("No se pudo guardar tu respuesta. Inténtalo de nuevo.");
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
+    <div className="w-full max-w-xs flex flex-col items-center gap-2">
     <div
-      className="w-full max-w-72 h-44 cursor-pointer select-none"
+      className="w-full min-h-48 h-48 sm:h-52 cursor-pointer select-none"
       style={{ perspective: "1200px" }}
       onClick={() => setFlipped((f) => !f)}
       role="button"
@@ -45,7 +57,7 @@ export default function Flashcard({ word, onAnswer }) {
           className="absolute inset-0 rounded-card border border-ink/15 dark:border-paper/15 bg-paper dark:bg-ink-light flex flex-col items-center justify-center gap-2 shadow-sm"
           style={{ backfaceVisibility: "hidden" }}
         >
-          <span className="font-display text-3xl">{word.text_en}</span>
+          <span className="font-display text-3xl px-4 text-center break-words">{word.text_en}</span>
           <span className="text-xs text-ink/50 dark:text-paper/50 uppercase tracking-wide">
             toca para traducir
           </span>
@@ -53,7 +65,7 @@ export default function Flashcard({ word, onAnswer }) {
 
         {/* Dorso */}
         <div
-          className="absolute inset-0 rounded-card border border-stamp-teal/40 bg-stamp-teal/10 dark:bg-stamp-teal/20 flex flex-col items-center justify-center gap-2 px-4 text-center"
+          className="absolute inset-0 rounded-card border border-stamp-teal/40 bg-stamp-teal/10 dark:bg-stamp-teal/20 flex flex-col items-center justify-center gap-2 px-4 py-3 text-center overflow-y-auto"
           style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
         >
           <span className="font-display text-2xl text-stamp-teal dark:text-paper">
@@ -65,16 +77,18 @@ export default function Flashcard({ word, onAnswer }) {
             </span>
           )}
           {onAnswer && (
-            <div className="flex gap-2 mt-1">
+            <div className="flex flex-wrap justify-center gap-2 mt-1">
               <button
                 onClick={(e) => handleAnswer(false, e)}
-                className="px-3 py-1.5 text-sm rounded-card bg-stamp-coral/15 text-stamp-coral font-medium hover:bg-stamp-coral/25 transition"
+                disabled={busy || !flipped}
+                className="px-3 py-2 min-h-10 text-sm rounded-card disabled:opacity-50 bg-stamp-coral/15 text-stamp-coral font-medium hover:bg-stamp-coral/25 transition"
               >
                 No la sabía
               </button>
               <button
                 onClick={(e) => handleAnswer(true, e)}
-                className="px-3 py-1.5 text-sm rounded-card bg-stamp-teal/15 text-stamp-teal font-medium hover:bg-stamp-teal/25 transition"
+                disabled={busy || !flipped}
+                className="px-3 py-2 min-h-10 text-sm rounded-card disabled:opacity-50 bg-stamp-teal/15 text-stamp-teal font-medium hover:bg-stamp-teal/25 transition"
               >
                 La sabía
               </button>
@@ -82,6 +96,12 @@ export default function Flashcard({ word, onAnswer }) {
           )}
         </div>
       </motion.div>
+    </div>
+    {error && (
+      <p role="alert" className="text-sm text-stamp-coral text-center">
+        {error}
+      </p>
+    )}
     </div>
   );
 }

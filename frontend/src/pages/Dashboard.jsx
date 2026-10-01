@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../features/auth/AuthContext";
 import { fetchDueWords, submitAnswer } from "../services/reviewService";
@@ -18,23 +18,33 @@ export default function Dashboard() {
   const [lastFeedback, setLastFeedback] = useState(null);
   const [challenges, setChallenges] = useState([]);
   const [toasts, setToasts] = useState([]);
+  const [loadError, setLoadError] = useState(false);
+  const toastTimers = useRef(new Set());
 
   useEffect(() => {
     loadQueue();
-    fetchTodayChallenges().then(setChallenges);
+    fetchTodayChallenges().then(setChallenges).catch(() => {});
+    const timers = toastTimers.current;
+    return () => timers.forEach(clearTimeout);
   }, []);
 
   function loadQueue() {
     setLoadingQueue(true);
+    setLoadError(false);
     fetchDueWords(15)
       .then((data) => setQueue(data.words))
+      .catch(() => setLoadError(true))
       .finally(() => setLoadingQueue(false));
   }
 
   function pushToasts(newItems) {
     setToasts((prev) => [...prev, ...newItems]);
     newItems.forEach((item) => {
-      setTimeout(() => dismissToast(item.id), 4500);
+      const timer = setTimeout(() => {
+        toastTimers.current.delete(timer);
+        dismissToast(item.id);
+      }, 4500);
+      toastTimers.current.add(timer);
     });
   }
 
@@ -66,20 +76,20 @@ export default function Dashboard() {
         })),
       ];
       pushToasts(items);
-      fetchTodayChallenges().then(setChallenges);
+      fetchTodayChallenges().then(setChallenges).catch(() => {});
     }
   }
 
   const currentWord = queue[0];
 
   return (
-    <div className="min-h-screen px-4 sm:px-6 py-8 max-w-3xl mx-auto">
-      <header className="flex items-start justify-between flex-wrap gap-4 mb-10">
+    <div className="min-h-dvh px-4 sm:px-6 py-6 sm:py-8 max-w-3xl mx-auto">
+      <header className="flex items-start justify-between flex-wrap gap-x-4 gap-y-3 mb-6 sm:mb-10">
         <div>
           <p className="text-sm text-ink/60 dark:text-paper/60">Hola,</p>
-          <h1 className="font-display text-2xl">{user?.username}</h1>
+          <h1 className="font-display text-2xl break-all">{user?.username}</h1>
         </div>
-        <nav aria-label="Navegación principal" className="flex items-center gap-4 flex-wrap">
+        <nav aria-label="Navegación principal" className="flex items-center gap-x-4 gap-y-2 flex-wrap">
           <Link
             to="/stats"
             className="text-sm text-ink/60 dark:text-paper/60 hover:text-stamp-teal transition"
@@ -104,7 +114,7 @@ export default function Dashboard() {
       </header>
 
       <section
-        className="mb-10 flex justify-center"
+        className="mb-8 sm:mb-10 flex justify-center"
         aria-label={`Racha de ${user?.current_streak ?? 0} días, ${user?.xp ?? 0} puntos de experiencia, nivel ${user?.level ?? 1}`}
       >
         <StreakTicket
@@ -114,7 +124,7 @@ export default function Dashboard() {
         />
       </section>
 
-      <main className="grid md:grid-cols-[1fr_260px] gap-8">
+      <main className="grid md:grid-cols-[minmax(0,1fr)_260px] gap-8">
         <section aria-label="Repaso de hoy">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-display text-xl">Repaso de hoy</h2>
@@ -132,7 +142,22 @@ export default function Dashboard() {
 
           {loadingQueue && <Loading label="Preparando tu repaso..." />}
 
-          {!loadingQueue && queue.length === 0 && (
+          {!loadingQueue && loadError && (
+            <div className="ticket px-6 py-8 text-center">
+              <p className="text-sm text-stamp-coral mb-3" role="alert">
+                No se pudo cargar tu repaso.
+              </p>
+              <button
+                type="button"
+                onClick={loadQueue}
+                className="px-4 py-2 min-h-10 rounded-card bg-ink text-paper dark:bg-paper dark:text-ink text-sm font-medium"
+              >
+                Reintentar
+              </button>
+            </div>
+          )}
+
+          {!loadingQueue && !loadError && queue.length === 0 && (
             <EmptyState
               icon="🛂"
               title="Sellaste tu pasaporte de hoy"
@@ -143,6 +168,7 @@ export default function Dashboard() {
           {!loadingQueue && currentWord && (
             <div className="flex flex-col items-center gap-6">
               <ExerciseRenderer
+                key={currentWord.id}
                 word={currentWord}
                 submitAnswer={submitAnswer}
                 onComplete={handleComplete}

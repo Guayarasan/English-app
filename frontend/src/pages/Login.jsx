@@ -26,7 +26,7 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
+    <div className="min-h-dvh flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-sm">
         <h1 className="font-display text-3xl mb-1">Bienvenido de vuelta</h1>
         <p className="text-ink/60 dark:text-paper/60 mb-8">
@@ -39,24 +39,26 @@ export default function Login() {
           </label>
           <input
             id="email"
+            autoComplete="email"
             type="email"
             required
             placeholder="tu@email.com"
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
-            className="px-4 py-3 rounded-card border border-ink/20 dark:border-paper/20 bg-transparent focus:outline-none focus:border-stamp-teal"
+            className="px-4 py-3 min-h-11 rounded-card border border-ink/20 dark:border-paper/20 bg-transparent focus:outline-none focus:border-stamp-teal"
           />
           <label htmlFor="password" className="sr-only">
             Contraseña
           </label>
           <input
             id="password"
+            autoComplete="current-password"
             type="password"
             required
             placeholder="Contraseña"
             value={form.password}
             onChange={(e) => setForm({ ...form, password: e.target.value })}
-            className="px-4 py-3 rounded-card border border-ink/20 dark:border-paper/20 bg-transparent focus:outline-none focus:border-stamp-teal"
+            className="px-4 py-3 min-h-11 rounded-card border border-ink/20 dark:border-paper/20 bg-transparent focus:outline-none focus:border-stamp-teal"
           />
 
           {error && (

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class WordOut(BaseModel):
@@ -15,9 +15,9 @@ class WordOut(BaseModel):
 
 
 class WordCreate(BaseModel):
-    text_en: str
-    text_es: str
+    text_en: str = Field(min_length=1)
+    text_es: str = Field(min_length=1)
     category: str | None = None
-    difficulty: int = 1
+    difficulty: int = Field(default=1, ge=1, le=5)
     example_sentence_en: str | None = None
     example_sentence_es: str | None = None

@@ -6,7 +6,7 @@
  */
 export default function StreakTicket({ streak, xp, level }) {
   return (
-    <div className="ticket flex items-center gap-6 px-6 py-3 bg-paper dark:bg-ink-light">
+    <div className="ticket flex items-center gap-4 sm:gap-6 px-5 sm:px-6 py-3 bg-paper dark:bg-ink-light">
       <div className="flex flex-col items-center">
         <span className="font-mono text-2xl font-bold text-stamp-coral">
           {streak}
