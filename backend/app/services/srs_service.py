@@ -17,6 +17,7 @@ Selección de palabras "debidas hoy" (get_due_words):
 """
 from datetime import datetime, timedelta, timezone
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.word import Word
@@ -82,7 +83,7 @@ def get_due_words(db: Session, user_id: int, limit: int = 15) -> list[Word]:
 
     # Completa con palabras nuevas que el usuario nunca ha visto
     seen_word_ids = (
-        db.query(UserWord.word_id).filter(UserWord.user_id == user_id).subquery()
+        select(UserWord.word_id).where(UserWord.user_id == user_id)
     )
     new_words = (
         db.query(Word)

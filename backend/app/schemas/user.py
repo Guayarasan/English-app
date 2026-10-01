@@ -1,11 +1,11 @@
 from datetime import date, datetime
-from pydantic import BaseModel, EmailStr, ConfigDict
+from pydantic import BaseModel, EmailStr, ConfigDict, Field
 
 
 class UserCreate(BaseModel):
     email: EmailStr
-    username: str
-    password: str
+    username: str = Field(min_length=3, max_length=30, pattern=r"^\S+$")
+    password: str = Field(min_length=8, max_length=72)  # bcrypt ignora/rechaza >72 bytes
 
 
 class UserLogin(BaseModel):

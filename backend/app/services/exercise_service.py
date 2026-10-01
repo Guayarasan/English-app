@@ -36,7 +36,8 @@ def check_fill_blank(word: Word, user_answer: str) -> bool:
 def check_writing(word: Word, user_sentence: str) -> bool:
     if not user_sentence or len(user_sentence.strip().split()) < 3:
         return False
-    return _normalize(word.text_en) in _normalize(user_sentence)
+    pattern = rf"\b{re.escape(_normalize(word.text_en))}\b"
+    return re.search(pattern, _normalize(user_sentence)) is not None
 
 
 def get_correct_answer(word: Word, exercise_type: str, direction: str | None) -> str:

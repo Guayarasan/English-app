@@ -17,7 +17,7 @@ def summary(db: Session = Depends(get_db), current_user: User = Depends(get_curr
 
 @router.get("/history", response_model=list[DailyStat])
 def history(
-    days: int = Query(default=30, le=90),
+    days: int = Query(default=30, ge=1, le=90),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -31,7 +31,7 @@ def categories(db: Session = Depends(get_db), current_user: User = Depends(get_c
 
 @router.get("/hardest-words", response_model=list[HardWord])
 def hardest_words(
-    limit: int = Query(default=10, le=50),
+    limit: int = Query(default=10, ge=1, le=50),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):

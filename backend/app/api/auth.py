@@ -32,13 +32,18 @@ def login(credentials: UserLogin, db: Session = Depends(get_db)):
 
 
 @router.post("/refresh", response_model=Token)
-def refresh(payload: TokenRefreshRequest):
+def refresh(payload: TokenRefreshRequest, db: Session = Depends(get_db)):
     data = decode_token(payload.refresh_token)
-    if not data or data.get("type") != "refresh":
+    if not data or data.get("type") != "refresh" or not data.get("sub"):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh token inválido"
         )
     user_id = data["sub"]
+    user = db.query(User).filter(User.id == int(user_id)).first()
+    if user is None or not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh token inválido"
+        )
     return Token(
         access_token=create_access_token(user_id),
         refresh_token=create_refresh_token(user_id),

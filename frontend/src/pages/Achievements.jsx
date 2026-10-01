@@ -19,7 +19,7 @@ export default function Achievements() {
   }, []);
 
   return (
-    <div className="min-h-screen px-4 sm:px-6 py-8 max-w-3xl mx-auto">
+    <div className="min-h-dvh px-4 sm:px-6 py-6 sm:py-8 max-w-3xl mx-auto">
       <header className="mb-8">
         <Link
           to="/dashboard"

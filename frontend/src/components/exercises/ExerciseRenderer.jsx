@@ -17,9 +17,15 @@ const EXERCISE_COMPONENTS = {
  * ejemplo; si la palabra no tiene, se cae a flashcard/translation.
  */
 function pickExerciseType(word) {
-  const pool = word.example_sentence_en
+  const sentence = word.example_sentence_en?.toLowerCase() ?? "";
+  const pool = sentence
     ? ["flashcard", "translation", "fill_blank", "writing"]
     : ["flashcard", "translation"];
+  // Si la palabra no aparece tal cual en la oración (ej. conjugada), fill_blank
+  // no podría ocultarla y regalaría la respuesta.
+  if (sentence && !sentence.includes(word.text_en.toLowerCase())) {
+    return ["flashcard", "translation", "writing"][word.id % 3];
+  }
   return pool[word.id % pool.length];
 }
 

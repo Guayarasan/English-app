@@ -59,7 +59,7 @@ def _resolve_is_correct(payload: AnswerSubmit, word: Word) -> bool:
 
 @router.get("/due", response_model=DueWordsOut)
 def get_due_words(
-    limit: int = Query(default=15, le=50),
+    limit: int = Query(default=15, ge=1, le=50),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -94,6 +94,9 @@ def submit_answer(
         db, current_user, is_correct=is_correct, is_new_word=is_new_word
     )
     unlocked_achievements = achievement_service.check_and_unlock(db, current_user)
+    # Los desafíos y logros suman XP extra: el nivel se recalcula al final
+    # para que no quede desfasado respecto al XP total.
+    current_user.level = gamification_service.level_from_xp(current_user.xp)
 
     attempt = Attempt(
         user_id=current_user.id,
